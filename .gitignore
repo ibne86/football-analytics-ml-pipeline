@@ -9,3 +9,6 @@ env/
 
 data/raw/*.json
 data/raw/*.jsonl
+
+dbt_project/logs/
+dbt_project/target/
