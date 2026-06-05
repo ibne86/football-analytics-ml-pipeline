@@ -1,6 +1,11 @@
 .env
-.venv/
 __pycache__/
 *.pyc
+
+.venv/
+.venv*/
+venv/
+env/
+
 data/raw/*.json
 data/raw/*.jsonl
