@@ -6,7 +6,6 @@ import requests
 from dotenv import load_dotenv
 
 
-# Load API key from .env file
 load_dotenv()
 
 API_KEY = os.getenv("FOOTBALL_API_KEY")
@@ -21,11 +20,10 @@ headers = {
     "x-apisports-key": API_KEY
 }
 
-# First simple test: fetch league data
-endpoint = f"{BASE_URL}/leagues"
+endpoint = f"{BASE_URL}/fixtures"
 
 params = {
-    "country": "England",
+    "league": 39,
     "season": 2023
 }
 
@@ -35,12 +33,12 @@ print("Status code:", response.status_code)
 
 data = response.json()
 
-# Create output folder if it does not exist
+print("Number of results:", data.get("results"))
+
 output_dir = Path("data/raw")
 output_dir.mkdir(parents=True, exist_ok=True)
 
-# Save raw API response
-output_file = output_dir / "leagues_england_2023.json"
+output_file = output_dir / "fixtures_premier_league_2023.json"
 
 with open(output_file, "w", encoding="utf-8") as file:
     json.dump(data, file, indent=2)
