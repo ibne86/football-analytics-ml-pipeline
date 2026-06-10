@@ -1,0 +1,8 @@
+version: 2
+
+sources:
+  - name: football_raw
+    database: football-analytics-ml
+    schema: football_raw
+    tables:
+      - name: raw_fixtures
