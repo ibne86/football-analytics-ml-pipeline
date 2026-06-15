@@ -1,7 +1,7 @@
 with matches as (
 
     select *
-    from {{ ref('stg_fixtures') }}
+    from {{ ref('stg_api_football__fixtures') }}
 
 ),
 
