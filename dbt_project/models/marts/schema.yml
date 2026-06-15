@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: match_results
+    description: "Clean match-level table containing football match results and derived result fields."
+    columns:
+      - name: match_id
+        tests:
+          - not_null
+          - unique
+
+      - name: match_date
+        tests:
+          - not_null
+
+      - name: home_team
+        tests:
+          - not_null
+
+      - name: away_team
+        tests:
+          - not_null
+
+      - name: home_goals
+        tests:
+          - not_null
+
+      - name: away_goals
+        tests:
+          - not_null
+
+      - name: match_result
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Home Win', 'Away Win', 'Draw']
+
+  - name: team_performance
+    description: "Team-level performance table with wins, draws, losses, goals, goal difference, and points."
+    columns:
+      - name: team_id
+        tests:
+          - not_null
+
+      - name: team_name
+        tests:
+          - not_null
+
+      - name: matches_played
+        tests:
+          - not_null
+
+      - name: wins
+        tests:
+          - not_null
+
+      - name: draws
+        tests:
+          - not_null
+
+      - name: losses
+        tests:
+          - not_null
+
+      - name: points
+        tests:
+          - not_null
