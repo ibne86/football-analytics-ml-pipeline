@@ -66,3 +66,45 @@ models:
       - name: points
         tests:
           - not_null
+
+  - name: home_away_performance
+    description: "Team-level home and away performance table with wins, draws, losses, goals, points, and win rate."
+    columns:
+      - name: team_id
+        tests:
+          - not_null
+
+      - name: team_name
+        tests:
+          - not_null
+
+      - name: home_away
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Home', 'Away']
+
+      - name: matches_played
+        tests:
+          - not_null
+
+      - name: wins
+        tests:
+          - not_null
+
+      - name: draws
+        tests:
+          - not_null
+
+      - name: losses
+        tests:
+          - not_null
+
+      - name: points
+        tests:
+          - not_null
+
+      - name: win_rate
+        tests:
+          - not_null
