@@ -187,18 +187,24 @@ These tables will be easier to use in Power BI.
 
 ### 6. Power BI Dashboard Layer
 
-Power BI will be used to build football analytics dashboards.
+The project includes a Power BI dashboard built from the clean BigQuery tables created by dbt.
 
-Possible dashboard insights:
+The first dashboard page provides a Premier League 2023/24 season overview, including:
 
-- total matches
-- total goals
-- top scoring teams
-- home vs away performance
-- wins, draws, and losses
-- team performance trends
-- league standings
-- team comparison
+- Total matches
+- Total goals
+- Home wins
+- Away wins
+- Draws
+- Points by team
+- Goals scored by team
+- Home vs away points comparison
+
+The dashboard uses the following dbt mart tables:
+
+- match_results
+- team_performance
+- home_away_performance
 
 ---
 
