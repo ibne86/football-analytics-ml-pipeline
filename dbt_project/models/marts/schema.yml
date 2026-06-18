@@ -2,83 +2,181 @@ version: 2
 
 models:
   - name: match_results
-    description: "Clean match-level table containing football match results and derived result fields."
+    description: "Clean match-level mart table containing one row per completed football match, with goals, match result, winner, loser, and result flags."
     columns:
       - name: match_id
+        description: "Unique identifier for each football match."
         tests:
           - not_null
           - unique
 
+      - name: match_datetime
+        description: "Full match date and time as a timestamp."
+
       - name: match_date
+        description: "Calendar date of the match."
         tests:
           - not_null
+
+      - name: league_id
+        description: "Unique identifier of the league."
+
+      - name: league_name
+        description: "Name of the football league."
+
+      - name: league_country
+        description: "Country where the league is played."
+
+      - name: season
+        description: "Football season of the match."
+
+      - name: match_round
+        description: "League round or matchweek."
+
+      - name: home_team_id
+        description: "Unique identifier of the home team."
 
       - name: home_team
+        description: "Name of the home team."
         tests:
           - not_null
 
+      - name: away_team_id
+        description: "Unique identifier of the away team."
+
       - name: away_team
+        description: "Name of the away team."
         tests:
           - not_null
 
       - name: home_goals
+        description: "Goals scored by the home team."
         tests:
           - not_null
 
       - name: away_goals
+        description: "Goals scored by the away team."
         tests:
           - not_null
 
+      - name: total_goals
+        description: "Total goals scored in the match."
+
       - name: match_result
+        description: "Derived match result: Home Win, Away Win, or Draw."
         tests:
           - not_null
           - accepted_values:
               arguments:
                 values: ['Home Win', 'Away Win', 'Draw']
 
+      - name: winning_team
+        description: "Name of the winning team. If the match was a draw, this field contains Draw."
+
+      - name: losing_team
+        description: "Name of the losing team. If the match was a draw, this field contains Draw."
+
+      - name: is_home_win
+        description: "Numeric flag where 1 means the home team won and 0 means otherwise."
+
+      - name: is_away_win
+        description: "Numeric flag where 1 means the away team won and 0 means otherwise."
+
+      - name: is_draw
+        description: "Numeric flag where 1 means the match ended in a draw and 0 means otherwise."
+
+      - name: venue_name
+        description: "Name of the stadium or venue."
+
+      - name: venue_city
+        description: "City where the match was played."
+
+      - name: match_status
+        description: "Full match status."
+
+      - name: match_status_short
+        description: "Short match status code."
+
   - name: team_performance
-    description: "Team-level performance table with wins, draws, losses, goals, goal difference, and points."
+    description: "Team-level mart table summarizing season performance by team, including matches played, wins, draws, losses, goals, goal difference, and points."
     columns:
+      - name: season
+        description: "Football season."
+
+      - name: league_id
+        description: "Unique identifier of the league."
+
+      - name: league_name
+        description: "Name of the football league."
+
       - name: team_id
+        description: "Unique identifier of the team."
         tests:
           - not_null
 
       - name: team_name
+        description: "Name of the team."
         tests:
           - not_null
 
       - name: matches_played
+        description: "Total number of completed matches played by the team."
         tests:
           - not_null
 
       - name: wins
+        description: "Total number of matches won by the team."
         tests:
           - not_null
 
       - name: draws
+        description: "Total number of matches drawn by the team."
         tests:
           - not_null
 
       - name: losses
+        description: "Total number of matches lost by the team."
         tests:
           - not_null
 
+      - name: goals_for
+        description: "Total goals scored by the team."
+
+      - name: goals_against
+        description: "Total goals conceded by the team."
+
+      - name: goal_difference
+        description: "Goals scored minus goals conceded."
+
       - name: points
+        description: "Total points calculated as wins multiplied by 3 plus draws multiplied by 1."
         tests:
           - not_null
 
   - name: home_away_performance
-    description: "Team-level home and away performance table with wins, draws, losses, goals, points, and win rate."
+    description: "Team-level mart table comparing each team's home and away performance using matches played, wins, draws, losses, goals, points, and win rate."
     columns:
+      - name: season
+        description: "Football season."
+
+      - name: league_id
+        description: "Unique identifier of the league."
+
+      - name: league_name
+        description: "Name of the football league."
+
       - name: team_id
+        description: "Unique identifier of the team."
         tests:
           - not_null
 
       - name: team_name
+        description: "Name of the team."
         tests:
           - not_null
 
       - name: home_away
+        description: "Indicates whether the performance row is for home matches or away matches."
         tests:
           - not_null
           - accepted_values:
@@ -86,25 +184,46 @@ models:
                 values: ['Home', 'Away']
 
       - name: matches_played
+        description: "Number of matches played at home or away."
         tests:
           - not_null
 
       - name: wins
+        description: "Number of wins at home or away."
         tests:
           - not_null
 
       - name: draws
+        description: "Number of draws at home or away."
         tests:
           - not_null
 
       - name: losses
+        description: "Number of losses at home or away."
         tests:
           - not_null
 
+      - name: goals_for
+        description: "Goals scored at home or away."
+
+      - name: goals_against
+        description: "Goals conceded at home or away."
+
+      - name: goal_difference
+        description: "Goals scored minus goals conceded for home or away matches."
+
       - name: points
+        description: "Points earned at home or away."
         tests:
           - not_null
 
       - name: win_rate
+        description: "Win rate calculated as wins divided by matches played."
         tests:
           - not_null
+
+      - name: avg_goals_for
+        description: "Average goals scored per home or away match."
+
+      - name: avg_goals_against
+        description: "Average goals conceded per home or away match."
