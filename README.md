@@ -43,10 +43,12 @@ This project is designed as a portfolio project to demonstrate practical data sk
 It focuses on:
 
 * collecting football data from an API
-* saving raw data
+* saving raw data locally
+* preparing raw data for BigQuery
 * loading raw data into BigQuery
 * cleaning and transforming data with dbt
-* preparing analytics-ready tables
+* creating staging, intermediate, and mart models
+* validating data quality with dbt tests
 * building dashboard-ready datasets
 * creating a Power BI dashboard
 * preparing future machine learning features
@@ -74,7 +76,7 @@ BigQuery Clean Analytics Tables
     ↓
 Power BI Dashboard
     ↓
-Machine Learning Prediction
+Future Machine Learning Prediction
 ```
 
 ---
@@ -161,10 +163,13 @@ dbt is used to clean and transform the raw data using SQL.
 
 The dbt layer includes:
 
+* source configuration
 * staging models
 * intermediate models
 * mart models
 * schema tests
+* custom business-rule tests
+* model and column documentation
 
 Example transformations:
 
@@ -172,7 +177,7 @@ Example transformations:
 * rename unclear columns
 * convert date fields
 * calculate match outcomes
-* create team-level performance rows
+* create one row per team per match
 * calculate wins, draws, losses, goals, goal difference, and points
 * prepare dashboard-ready tables
 
@@ -246,6 +251,70 @@ The ML layer will be added after the analytics pipeline and dashboard layer are 
 
 ---
 
+## ✅ Data Quality and dbt Tests
+
+This project includes dbt tests to validate both basic data quality and football-specific business rules.
+
+### Generic dbt Tests
+
+Generic schema tests are used to check important columns in the mart models.
+
+Examples:
+
+* `match_id` is not null
+* `match_id` is unique
+* `home_team` and `away_team` are not null
+* `match_result` only contains accepted values: `Home Win`, `Away Win`, or `Draw`
+* `team_name`, `matches_played`, `wins`, `draws`, `losses`, and `points` are not null
+
+### Custom Business Rule Tests
+
+Custom SQL tests are added to validate football calculations.
+
+The project checks that:
+
+```text
+points = wins * 3 + draws
+matches_played = wins + draws + losses
+goal_difference = goals_for - goals_against
+```
+
+These tests help ensure that the final analytics tables are reliable before they are used in Power BI or future machine learning models.
+
+Run all dbt tests with:
+
+```bash
+cd dbt_project
+dbt test
+```
+
+---
+
+## 📚 dbt Documentation
+
+The project includes dbt model and column documentation for:
+
+* staging models
+* intermediate models
+* mart models
+
+dbt documentation was generated locally using:
+
+```bash
+cd dbt_project
+dbt docs generate
+```
+
+The documentation can be viewed locally with:
+
+```bash
+dbt docs serve
+```
+
+This helps explain what each dbt model does, how the models relate to each other, and what each important column means.
+
+---
+
 ## 🛠️ Tech Stack
 
 | Area                 | Tools              |
@@ -276,20 +345,27 @@ football-analytics-ml-pipeline/
 │
 ├── dbt_project/
 │   ├── dbt_project.yml
-│   └── models/
-│       ├── staging/
-│       │   └── api_football/
-│       │       ├── _api_football__sources.yml
-│       │       └── stg_api_football__fixtures.sql
-│       │
-│       ├── intermediate/
-│       │   └── int_team_match_results.sql
-│       │
-│       └── marts/
-│           ├── match_results.sql
-│           ├── team_performance.sql
-│           ├── home_away_performance.sql
-│           └── schema.yml
+│   ├── models/
+│   │   ├── staging/
+│   │   │   └── api_football/
+│   │   │       ├── _api_football__sources.yml
+│   │   │       ├── _api_football__models.yml
+│   │   │       └── stg_api_football__fixtures.sql
+│   │   │
+│   │   ├── intermediate/
+│   │   │   ├── _intermediate__models.yml
+│   │   │   └── int_team_match_results.sql
+│   │   │
+│   │   └── marts/
+│   │       ├── match_results.sql
+│   │       ├── team_performance.sql
+│   │       ├── home_away_performance.sql
+│   │       └── schema.yml
+│   │
+│   └── tests/
+│       ├── assert_team_points_are_correct.sql
+│       ├── assert_matches_played_are_correct.sql
+│       └── assert_goal_difference_is_correct.sql
 │
 ├── dashboards/
 │   └── powerbi/
@@ -297,12 +373,6 @@ football-analytics-ml-pipeline/
 │       ├── README.md
 │       └── screenshots/
 │           └── season_overview.png
-│
-├── ml/
-│   └── train_model.py
-│
-├── .github/
-│   └── workflows/
 │
 ├── README.md
 └── requirements.txt
@@ -337,6 +407,8 @@ This project demonstrates practical data and engineering skills:
 * dbt data modeling
 * staging, intermediate, and mart model design
 * dbt schema testing
+* custom dbt business-rule testing
+* dbt model and column documentation
 * dashboard data preparation
 * Power BI dashboard creation
 * machine learning feature preparation
@@ -361,14 +433,16 @@ Completed:
 * intermediate model created for team-level match rows
 * mart models created for match results, team performance, and home/away performance
 * dbt schema tests added
+* custom dbt business-rule tests added
+* dbt model and column documentation added
 * Power BI dashboard created for Premier League 2023/24 season overview
-* dashboard screenshot added to the repository
+* dashboard screenshot added to the repository and README
 
 Current focus:
 
-* improve dashboard documentation
 * prepare future ML feature tables
 * add automation with GitHub Actions later
+* improve dashboard pages over time
 
 ---
 
@@ -413,8 +487,10 @@ Current focus:
 * [x] Create staging model
 * [x] Create intermediate model
 * [x] Create final mart tables
-* [x] Add dbt tests
-* [ ] Generate dbt documentation
+* [x] Add dbt schema tests
+* [x] Add custom dbt business-rule tests
+* [x] Add dbt model documentation
+* [x] Generate dbt documentation locally
 
 ---
 
@@ -482,6 +558,18 @@ Run dbt tests:
 dbt test
 ```
 
+Generate dbt documentation:
+
+```bash
+dbt docs generate
+```
+
+Serve dbt documentation locally:
+
+```bash
+dbt docs serve
+```
+
 ---
 
 ## 🔐 Environment Variables
@@ -517,6 +605,7 @@ API data collection
 → raw data storage
 → BigQuery loading
 → dbt transformation
+→ data quality testing
 → dashboard-ready tables
 → Power BI dashboard
 ```
