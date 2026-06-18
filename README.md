@@ -48,6 +48,7 @@ It focuses on:
 * loading raw data into BigQuery
 * cleaning and transforming data with dbt
 * creating staging, intermediate, and mart models
+* creating dashboard-ready KPI tables
 * validating data quality with dbt tests
 * building dashboard-ready datasets
 * creating a Power BI dashboard
@@ -153,6 +154,7 @@ football_dbt.match_results
 football_dbt.int_team_match_results
 football_dbt.team_performance
 football_dbt.home_away_performance
+football_dbt.season_summary
 ```
 
 ---
@@ -179,6 +181,7 @@ Example transformations:
 * calculate match outcomes
 * create one row per team per match
 * calculate wins, draws, losses, goals, goal difference, and points
+* create a season-level KPI summary table
 * prepare dashboard-ready tables
 
 dbt helps separate raw data from clean analytical data.
@@ -195,7 +198,17 @@ Current analytics tables:
 match_results
 team_performance
 home_away_performance
+season_summary
 ```
+
+The `season_summary` table contains dashboard KPI metrics such as:
+
+* total matches
+* total goals
+* home wins
+* away wins
+* draws
+* average goals per match
 
 These tables are used in Power BI for dashboard reporting.
 
@@ -216,8 +229,12 @@ The first dashboard page provides a Premier League 2023/24 season overview, incl
 * Goals scored by team
 * Home vs away points comparison
 
+The KPI cards use the dbt `season_summary` mart table.
+The charts use the dbt mart tables for match, team, and home/away performance analysis.
+
 The dashboard uses the following dbt mart tables:
 
+* `season_summary`
 * `match_results`
 * `team_performance`
 * `home_away_performance`
@@ -266,6 +283,7 @@ Examples:
 * `home_team` and `away_team` are not null
 * `match_result` only contains accepted values: `Home Win`, `Away Win`, or `Draw`
 * `team_name`, `matches_played`, `wins`, `draws`, `losses`, and `points` are not null
+* `season_summary` KPI fields such as `total_matches`, `total_goals`, `home_wins`, `away_wins`, and `draws` are not null
 
 ### Custom Business Rule Tests
 
@@ -297,6 +315,7 @@ The project includes dbt model and column documentation for:
 * staging models
 * intermediate models
 * mart models
+* season summary KPI model
 
 dbt documentation was generated locally using:
 
@@ -360,6 +379,7 @@ football-analytics-ml-pipeline/
 │   │       ├── match_results.sql
 │   │       ├── team_performance.sql
 │   │       ├── home_away_performance.sql
+│   │       ├── season_summary.sql
 │   │       └── schema.yml
 │   │
 │   └── tests/
@@ -390,6 +410,8 @@ This project can answer questions such as:
 * Which teams performed better away?
 * Which teams had the strongest goal difference?
 * How many matches ended in home wins, away wins, and draws?
+* What are the season-level KPI totals?
+* What was the average number of goals per match?
 * Can match outcomes be predicted from team statistics?
 
 ---
@@ -406,6 +428,7 @@ This project demonstrates practical data and engineering skills:
 * SQL transformation
 * dbt data modeling
 * staging, intermediate, and mart model design
+* dashboard-ready KPI mart creation
 * dbt schema testing
 * custom dbt business-rule testing
 * dbt model and column documentation
@@ -432,10 +455,12 @@ Completed:
 * staging model created for raw fixtures
 * intermediate model created for team-level match rows
 * mart models created for match results, team performance, and home/away performance
+* season summary mart model created for dashboard KPI metrics
 * dbt schema tests added
 * custom dbt business-rule tests added
 * dbt model and column documentation added
 * Power BI dashboard created for Premier League 2023/24 season overview
+* Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 
 Current focus:
@@ -487,6 +512,7 @@ Current focus:
 * [x] Create staging model
 * [x] Create intermediate model
 * [x] Create final mart tables
+* [x] Create season summary KPI mart
 * [x] Add dbt schema tests
 * [x] Add custom dbt business-rule tests
 * [x] Add dbt model documentation
@@ -500,6 +526,7 @@ Current focus:
 * [x] Build season overview dashboard
 * [x] Build team performance visuals
 * [x] Build home vs away analysis
+* [x] Use `season_summary` mart for KPI cards
 * [x] Add dashboard screenshot to repository
 * [x] Add dashboard screenshot to README
 
@@ -609,6 +636,8 @@ API data collection
 → dashboard-ready tables
 → Power BI dashboard
 ```
+
+The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
 The machine learning layer will be added after the analytics pipeline and dashboard layer are stable.
 
