@@ -227,3 +227,54 @@ models:
 
       - name: avg_goals_against
         description: "Average goals conceded per home or away match."
+
+  - name: season_summary
+    description: "Season-level mart table containing dashboard KPI metrics such as total matches, total goals, home wins, away wins, draws, and average goals per match."
+    columns:
+      - name: season
+        description: "Football season."
+        tests:
+          - not_null
+
+      - name: league_id
+        description: "Unique identifier of the league."
+        tests:
+          - not_null
+
+      - name: league_name
+        description: "Name of the football league."
+        tests:
+          - not_null
+
+      - name: league_country
+        description: "Country where the league is played."
+
+      - name: total_matches
+        description: "Total number of completed matches in the season."
+        tests:
+          - not_null
+
+      - name: total_goals
+        description: "Total number of goals scored in the season."
+        tests:
+          - not_null
+
+      - name: home_wins
+        description: "Total number of matches won by home teams."
+        tests:
+          - not_null
+
+      - name: away_wins
+        description: "Total number of matches won by away teams."
+        tests:
+          - not_null
+
+      - name: draws
+        description: "Total number of drawn matches."
+        tests:
+          - not_null
+
+      - name: avg_goals_per_match
+        description: "Average number of goals scored per match."
+        tests:
+          - not_null
