@@ -328,6 +328,36 @@ models:
         tests:
           - not_null
 
+      - name: home_matches_played_before
+        description: "Number of matches the home team had already played in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_matches_played_before
+        description: "Number of matches the away team had already played in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: home_points_before
+        description: "Total points earned by the home team in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_points_before
+        description: "Total points earned by the away team in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: home_avg_points_before
+        description: "Average points per match for the home team in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_avg_points_before
+        description: "Average points per match for the away team in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
       - name: home_goals
         description: "Goals scored by the home team. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
