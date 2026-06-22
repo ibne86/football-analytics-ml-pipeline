@@ -24,6 +24,7 @@ final as (
         total_goals,
 
         match_result,
+        match_result as target_match_result,
 
         is_home_win,
         is_away_win,

@@ -280,7 +280,7 @@ models:
           - not_null
           
   - name: ml_match_features
-    description: "ML-ready mart table with one row per completed match, containing match details, goals, result labels, and outcome flags for future machine learning."
+    description: "ML-ready mart table with one row per completed match, containing match details, the prediction target, goals, result labels, and outcome flags for future machine learning."
     columns:
       - name: match_id
         description: "Unique identifier for each match."
@@ -329,38 +329,47 @@ models:
           - not_null
 
       - name: home_goals
-        description: "Goals scored by the home team."
+        description: "Goals scored by the home team. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
           - not_null
 
       - name: away_goals
-        description: "Goals scored by the away team."
+        description: "Goals scored by the away team. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
           - not_null
 
       - name: total_goals
-        description: "Total goals scored in the match."
+        description: "Total goals scored in the match. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
           - not_null
 
       - name: match_result
-        description: "Final match result: Home Win, Away Win, or Draw."
+        description: "Final match result: Home Win, Away Win, or Draw. This is kept as an outcome/reference column."
         tests:
           - not_null
           - accepted_values:
-              values: ['Home Win', 'Away Win', 'Draw']
+              arguments:
+                values: ['Home Win', 'Away Win', 'Draw']
+
+      - name: target_match_result
+        description: "Prediction target for future match-result models. Expected values are Home Win, Away Win, or Draw."
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['Home Win', 'Away Win', 'Draw']
 
       - name: is_home_win
-        description: "Flag showing whether the home team won the match."
+        description: "Flag showing whether the home team won the match. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
           - not_null
 
       - name: is_away_win
-        description: "Flag showing whether the away team won the match."
+        description: "Flag showing whether the away team won the match. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
           - not_null
 
       - name: is_draw
-        description: "Flag showing whether the match ended in a draw."
+        description: "Flag showing whether the match ended in a draw. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
           - not_null
