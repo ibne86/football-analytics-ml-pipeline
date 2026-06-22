@@ -278,3 +278,89 @@ models:
         description: "Average number of goals scored per match."
         tests:
           - not_null
+          
+  - name: ml_match_features
+    description: "ML-ready mart table with one row per completed match, containing match details, goals, result labels, and outcome flags for future machine learning."
+    columns:
+      - name: match_id
+        description: "Unique identifier for each match."
+        tests:
+          - not_null
+          - unique
+
+      - name: season
+        description: "Football season."
+        tests:
+          - not_null
+
+      - name: league_id
+        description: "Unique identifier of the league."
+        tests:
+          - not_null
+
+      - name: league_name
+        description: "Name of the football league."
+        tests:
+          - not_null
+
+      - name: match_date
+        description: "Date of the match."
+        tests:
+          - not_null
+
+      - name: home_team_id
+        description: "Unique identifier of the home team."
+        tests:
+          - not_null
+
+      - name: home_team
+        description: "Name of the home team."
+        tests:
+          - not_null
+
+      - name: away_team_id
+        description: "Unique identifier of the away team."
+        tests:
+          - not_null
+
+      - name: away_team
+        description: "Name of the away team."
+        tests:
+          - not_null
+
+      - name: home_goals
+        description: "Goals scored by the home team."
+        tests:
+          - not_null
+
+      - name: away_goals
+        description: "Goals scored by the away team."
+        tests:
+          - not_null
+
+      - name: total_goals
+        description: "Total goals scored in the match."
+        tests:
+          - not_null
+
+      - name: match_result
+        description: "Final match result: Home Win, Away Win, or Draw."
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['Home Win', 'Away Win', 'Draw']
+
+      - name: is_home_win
+        description: "Flag showing whether the home team won the match."
+        tests:
+          - not_null
+
+      - name: is_away_win
+        description: "Flag showing whether the away team won the match."
+        tests:
+          - not_null
+
+      - name: is_draw
+        description: "Flag showing whether the match ended in a draw."
+        tests:
+          - not_null
