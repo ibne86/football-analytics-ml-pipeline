@@ -245,7 +245,15 @@ The dashboard uses the following dbt mart tables:
 
 ### 7. Machine Learning Layer
 
-The cleaned data will later be prepared for machine learning.
+The project now includes a basic ML-ready dbt mart:
+
+```text
+ml_match_features
+```
+
+This table contains one row per completed match and includes match identifiers, teams, dates, result labels, goals, and outcome flags.
+
+At this stage, it is a starter ML feature table. The next ML work will improve this table with leakage-safe pre-match features.
 
 Possible prediction target:
 
@@ -264,7 +272,9 @@ Possible ML features:
 * previous match results
 * team performance trends
 
-The ML layer will be added after the analytics pipeline and dashboard layer are stable.
+Goal and result columns should be used as labels or evaluation fields, not as predictive input features.
+
+The full ML layer will be added after the analytics pipeline and dashboard layer are stable.
 
 ---
 
@@ -380,6 +390,7 @@ football-analytics-ml-pipeline/
 │   │       ├── team_performance.sql
 │   │       ├── home_away_performance.sql
 │   │       ├── season_summary.sql
+│   │       ├── ml_match_features.sql
 │   │       └── schema.yml
 │   │
 │   └── tests/
@@ -459,13 +470,14 @@ Completed:
 * dbt schema tests added
 * custom dbt business-rule tests added
 * dbt model and column documentation added
+* basic ML-ready feature mart created with `ml_match_features`
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 
 Current focus:
 
-* prepare future ML feature tables
+* enhance `ml_match_features` with leakage-safe pre-match features
 * add automation with GitHub Actions later
 * improve dashboard pages over time
 
@@ -534,7 +546,8 @@ Current focus:
 
 ### Phase 6: Machine Learning
 
-* [ ] Create ML feature table
+* [x] Create basic ML-ready feature table
+* [ ] Add leakage-safe pre-match rolling features
 * [ ] Define prediction target
 * [ ] Train baseline model
 * [ ] Evaluate model performance
@@ -639,7 +652,7 @@ API data collection
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer will be added after the analytics pipeline and dashboard layer are stable.
+The machine learning layer has a basic feature mart and will be expanded after the analytics pipeline and dashboard layer are stable.
 
 ---
 
