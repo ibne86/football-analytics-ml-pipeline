@@ -13,6 +13,8 @@ team_match_rows as (
         season,
         league_id,
         home_team_id as team_id,
+        home_goals as goals_for,
+        away_goals as goals_against,
 
         case
             when match_result = 'Home Win' then 3
@@ -30,6 +32,8 @@ team_match_rows as (
         season,
         league_id,
         away_team_id as team_id,
+        away_goals as goals_for,
+        home_goals as goals_against,
 
         case
             when match_result = 'Away Win' then 3
@@ -55,6 +59,12 @@ team_pre_match_rollups as (
             rows between unbounded preceding and 1 preceding
         ) as matches_played_before,
 
+        count(*) over (
+            partition by season, league_id, team_id
+            order by match_datetime, match_id
+            rows between 5 preceding and 1 preceding
+        ) as matches_played_last_5,
+
         coalesce(
             sum(points) over (
                 partition by season, league_id, team_id
@@ -62,7 +72,34 @@ team_pre_match_rollups as (
                 rows between unbounded preceding and 1 preceding
             ),
             0
-        ) as points_before
+        ) as points_before,
+
+        coalesce(
+            sum(points) over (
+                partition by season, league_id, team_id
+                order by match_datetime, match_id
+                rows between 5 preceding and 1 preceding
+            ),
+            0
+        ) as points_last_5,
+
+        coalesce(
+            sum(goals_for) over (
+                partition by season, league_id, team_id
+                order by match_datetime, match_id
+                rows between 5 preceding and 1 preceding
+            ),
+            0
+        ) as goals_for_last_5,
+
+        coalesce(
+            sum(goals_against) over (
+                partition by season, league_id, team_id
+                order by match_datetime, match_id
+                rows between 5 preceding and 1 preceding
+            ),
+            0
+        ) as goals_against_last_5
 
     from team_match_rows
 
@@ -80,7 +117,14 @@ team_pre_match_features as (
         coalesce(
             safe_divide(points_before, matches_played_before),
             0
-        ) as avg_points_before
+        ) as avg_points_before,
+        points_last_5,
+        coalesce(
+            safe_divide(points_last_5, matches_played_last_5),
+            0
+        ) as avg_points_last_5,
+        goals_for_last_5,
+        goals_against_last_5
 
     from team_pre_match_rollups
 
@@ -108,6 +152,18 @@ final as (
 
         home_features.avg_points_before as home_avg_points_before,
         away_features.avg_points_before as away_avg_points_before,
+
+        home_features.points_last_5 as home_points_last_5,
+        away_features.points_last_5 as away_points_last_5,
+
+        home_features.avg_points_last_5 as home_avg_points_last_5,
+        away_features.avg_points_last_5 as away_avg_points_last_5,
+
+        home_features.goals_for_last_5 as home_goals_for_last_5,
+        away_features.goals_for_last_5 as away_goals_for_last_5,
+
+        home_features.goals_against_last_5 as home_goals_against_last_5,
+        away_features.goals_against_last_5 as away_goals_against_last_5,
 
         matches.home_goals,
         matches.away_goals,

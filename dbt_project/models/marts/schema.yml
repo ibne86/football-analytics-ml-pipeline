@@ -358,6 +358,46 @@ models:
         tests:
           - not_null
 
+      - name: home_points_last_5
+        description: "Total points earned by the home team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_points_last_5
+        description: "Total points earned by the away team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: home_avg_points_last_5
+        description: "Average points per match for the home team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_avg_points_last_5
+        description: "Average points per match for the away team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: home_goals_for_last_5
+        description: "Goals scored by the home team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_goals_for_last_5
+        description: "Goals scored by the away team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: home_goals_against_last_5
+        description: "Goals conceded by the home team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
+      - name: away_goals_against_last_5
+        description: "Goals conceded by the away team across its previous five matches in the same league and season before this match. Leakage-safe input feature."
+        tests:
+          - not_null
+
       - name: home_goals
         description: "Goals scored by the home team. This is an outcome/reference column and should not be used as an input feature for pre-match prediction."
         tests:
