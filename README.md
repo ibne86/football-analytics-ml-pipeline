@@ -245,28 +245,48 @@ The dashboard uses the following dbt mart tables:
 
 ### 7. Machine Learning Layer
 
-The project now includes a basic ML-ready dbt mart:
+The project now includes an ML-ready dbt mart:
 
 ```text
 ml_match_features
 ```
 
-This table contains one row per completed match and includes match identifiers, teams, dates, result labels, goals, and outcome flags.
+This table contains one row per completed match and includes match identifiers, teams, dates, leakage-safe pre-match features, result labels, goals, and outcome flags.
 
-At this stage, it is a starter ML feature table. The next ML work will improve this table with leakage-safe pre-match features.
-
-Possible prediction target:
+The table includes a clear prediction target:
 
 ```text
-Predict match result: home win / draw / away win
+target_match_result = Home Win / Draw / Away Win
 ```
 
-Possible ML features:
+The table also includes pre-match input features that are available before each match starts.
 
-* home team recent form
-* away team recent form
-* goals scored
-* goals conceded
+Season-to-date features:
+
+```text
+home_matches_played_before
+away_matches_played_before
+home_points_before
+away_points_before
+home_avg_points_before
+away_avg_points_before
+```
+
+Recent-form features:
+
+```text
+home_points_last_5
+away_points_last_5
+home_avg_points_last_5
+away_avg_points_last_5
+home_goals_for_last_5
+away_goals_for_last_5
+home_goals_against_last_5
+away_goals_against_last_5
+```
+
+Future ML features may include:
+
 * home advantage
 * league position
 * previous match results
@@ -274,7 +294,7 @@ Possible ML features:
 
 Goal and result columns should be used as labels or evaluation fields, not as predictive input features.
 
-The full ML layer will be added after the analytics pipeline and dashboard layer are stable.
+The next ML step is to train a simple baseline model in Python using the safe input features from `ml_match_features`.
 
 ---
 
@@ -471,13 +491,16 @@ Completed:
 * custom dbt business-rule tests added
 * dbt model and column documentation added
 * basic ML-ready feature mart created with `ml_match_features`
+* ML prediction target defined with `target_match_result`
+* leakage-safe season-to-date ML features added
+* leakage-safe recent-form ML features added
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 
 Current focus:
 
-* enhance `ml_match_features` with leakage-safe pre-match features
+* train a simple baseline ML model in Python
 * add automation with GitHub Actions later
 * improve dashboard pages over time
 
@@ -547,8 +570,9 @@ Current focus:
 ### Phase 6: Machine Learning
 
 * [x] Create basic ML-ready feature table
-* [ ] Add leakage-safe pre-match rolling features
-* [ ] Define prediction target
+* [x] Define prediction target
+* [x] Add leakage-safe season-to-date features
+* [x] Add leakage-safe recent-form features
 * [ ] Train baseline model
 * [ ] Evaluate model performance
 * [ ] Compare model results
@@ -652,7 +676,7 @@ API data collection
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer has a basic feature mart and will be expanded after the analytics pipeline and dashboard layer are stable.
+The machine learning layer now has a documented feature mart with a prediction target, season-to-date features, and recent-form features. The next step is to train and evaluate a simple baseline model in Python.
 
 ---
 
