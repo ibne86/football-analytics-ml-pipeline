@@ -294,7 +294,45 @@ Future ML features may include:
 
 Goal and result columns should be used as labels or evaluation fields, not as predictive input features.
 
-The next ML step is to train a simple baseline model in Python using the safe input features from `ml_match_features`.
+The first Python ML step uses these safe input features to train and evaluate a simple baseline model.
+
+### Baseline ML Model
+
+The project includes a Python baseline model script:
+
+```text
+ml/train_baseline_model.py
+```
+
+The baseline model uses Logistic Regression to predict:
+
+```text
+target_match_result
+```
+
+The model uses only leakage-safe pre-match input features from `ml_match_features`.
+
+Outcome and reference columns are intentionally excluded from model inputs:
+
+```text
+home_goals
+away_goals
+total_goals
+match_result
+target_match_result
+is_home_win
+is_away_win
+is_draw
+```
+
+Current baseline result:
+
+```text
+Majority-class accuracy:      0.461
+Logistic Regression accuracy: 0.513
+```
+
+The Logistic Regression baseline performs better than always predicting the most common result, but it does not yet predict draws well.
 
 ---
 
@@ -425,6 +463,9 @@ football-analytics-ml-pipeline/
 │       └── screenshots/
 │           └── season_overview.png
 │
+├── ml/
+│   └── train_baseline_model.py
+│
 ├── README.md
 └── requirements.txt
 ```
@@ -466,6 +507,7 @@ This project demonstrates practical data and engineering skills:
 * dashboard data preparation
 * Power BI dashboard creation
 * machine learning feature preparation
+* baseline machine learning model training
 * GitHub documentation
 * branch-based development workflow
 
@@ -494,13 +536,15 @@ Completed:
 * ML prediction target defined with `target_match_result`
 * leakage-safe season-to-date ML features added
 * leakage-safe recent-form ML features added
+* Logistic Regression baseline model created in Python
+* baseline model evaluated against a majority-class guess
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 
 Current focus:
 
-* train a simple baseline ML model in Python
+* improve baseline model handling of draw predictions
 * add automation with GitHub Actions later
 * improve dashboard pages over time
 
@@ -573,8 +617,9 @@ Current focus:
 * [x] Define prediction target
 * [x] Add leakage-safe season-to-date features
 * [x] Add leakage-safe recent-form features
-* [ ] Train baseline model
-* [ ] Evaluate model performance
+* [x] Train baseline model
+* [x] Evaluate baseline model performance
+* [ ] Improve draw prediction handling
 * [ ] Compare model results
 * [ ] Document ML findings
 
@@ -634,6 +679,12 @@ Serve dbt documentation locally:
 dbt docs serve
 ```
 
+Run the baseline ML model:
+
+```bash
+python ml/train_baseline_model.py
+```
+
 ---
 
 ## 🔐 Environment Variables
@@ -676,7 +727,7 @@ API data collection
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer now has a documented feature mart with a prediction target, season-to-date features, and recent-form features. The next step is to train and evaluate a simple baseline model in Python.
+The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, and a Logistic Regression baseline model. The next step is to improve draw prediction handling and compare the baseline against another model.
 
 ---
 
