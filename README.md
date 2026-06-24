@@ -294,23 +294,34 @@ Future ML features may include:
 
 Goal and result columns should be used as labels or evaluation fields, not as predictive input features.
 
-The first Python ML step uses these safe input features to train and evaluate a simple baseline model.
+The first Python ML step uses these safe input features to train and evaluate simple Logistic Regression models.
 
-### Baseline ML Model
+### ML Model Training Scripts
 
-The project includes a Python baseline model script:
+The project includes two Python ML training scripts:
 
 ```text
 ml/train_baseline_model.py
+ml/train_balanced_logistic_regression.py
 ```
 
-The baseline model uses Logistic Regression to predict:
+`train_baseline_model.py` trains the original Logistic Regression baseline without class weighting.
+
+`train_balanced_logistic_regression.py` trains Logistic Regression with:
+
+```text
+class_weight = balanced
+```
+
+The balanced model was added because the original baseline did not predict draws well.
+
+Both models predict:
 
 ```text
 target_match_result
 ```
 
-The model uses only leakage-safe pre-match input features from `ml_match_features`.
+Both models use only leakage-safe pre-match input features from `ml_match_features`.
 
 Outcome and reference columns are intentionally excluded from model inputs:
 
@@ -325,14 +336,29 @@ is_away_win
 is_draw
 ```
 
-Current baseline result:
+The original baseline result:
 
 ```text
 Majority-class accuracy:      0.461
 Logistic Regression accuracy: 0.513
 ```
 
-The Logistic Regression baseline performs better than always predicting the most common result, but it does not yet predict draws well.
+The original Logistic Regression baseline performs better than always predicting the most common result, but it does not predict draws well.
+
+The balanced Logistic Regression model improves draw handling, while also changing the trade-off between overall accuracy and class-level performance.
+
+MLflow is used to track model runs, metrics, parameters, artifacts, and trained model outputs locally.
+
+The main comparison metrics are:
+
+```text
+accuracy
+macro F1 score
+weighted F1 score
+draw precision
+draw recall
+draw F1 score
+```
 
 ---
 
@@ -464,7 +490,8 @@ football-analytics-ml-pipeline/
 │           └── season_overview.png
 │
 ├── ml/
-│   └── train_baseline_model.py
+│   ├── train_baseline_model.py
+│   └── train_balanced_logistic_regression.py
 │
 ├── README.md
 └── requirements.txt
@@ -538,13 +565,16 @@ Completed:
 * leakage-safe recent-form ML features added
 * Logistic Regression baseline model created in Python
 * baseline model evaluated against a majority-class guess
+* balanced Logistic Regression model added to improve draw prediction handling
+* MLflow tracking added for local model experiment tracking
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 
 Current focus:
 
-* improve baseline model handling of draw predictions
+* compare baseline and balanced Logistic Regression runs in MLflow
+* add cross-validation for more reliable model evaluation
 * add automation with GitHub Actions later
 * improve dashboard pages over time
 
@@ -619,8 +649,9 @@ Current focus:
 * [x] Add leakage-safe recent-form features
 * [x] Train baseline model
 * [x] Evaluate baseline model performance
-* [ ] Improve draw prediction handling
-* [ ] Compare model results
+* [x] Improve draw prediction handling with balanced Logistic Regression
+* [x] Track model results with MLflow
+* [ ] Compare model results with cross-validation
 * [ ] Document ML findings
 
 ---
@@ -685,6 +716,18 @@ Run the baseline ML model:
 python ml/train_baseline_model.py
 ```
 
+Run the balanced Logistic Regression model:
+
+```bash
+python ml/train_balanced_logistic_regression.py
+```
+
+Start the local MLflow UI:
+
+```bash
+python -m mlflow ui --backend-store-uri sqlite:///mlflow.db
+```
+
 ---
 
 ## 🔐 Environment Variables
@@ -727,7 +770,7 @@ API data collection
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, and a Logistic Regression baseline model. The next step is to improve draw prediction handling and compare the baseline against another model.
+The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, and local MLflow experiment tracking. The next step is to compare model performance more reliably with cross-validation before adding another model type.
 
 ---
 
