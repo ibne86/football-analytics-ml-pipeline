@@ -1,7 +1,11 @@
 from __future__ import annotations
 
+import json
 import os
+from tempfile import TemporaryDirectory
 
+import mlflow
+import mlflow.sklearn
 import pandas as pd
 from dotenv import load_dotenv
 from google.cloud import bigquery
@@ -14,7 +18,12 @@ from sklearn.preprocessing import StandardScaler
 
 
 DEFAULT_FEATURE_TABLE = "football-analytics-ml.football_dbt.ml_match_features"
+DEFAULT_MLFLOW_EXPERIMENT = "football-match-result-baseline"
+DEFAULT_MLFLOW_TRACKING_URI = "sqlite:///mlflow.db"
 TARGET_COLUMN = "target_match_result"
+MODEL_NAME = "baseline_logistic_regression"
+TEST_SIZE = 0.2
+RANDOM_STATE = 42
 
 SAFE_FEATURE_COLUMNS = [
     "home_matches_played_before",
@@ -86,6 +95,121 @@ def validate_input_data(df: pd.DataFrame) -> None:
         raise ValueError("The target column must contain at least two classes.")
 
 
+def value_counts_dict(series: pd.Series) -> dict[str, int]:
+    return {str(label): int(count) for label, count in series.value_counts().items()}
+
+
+def metric_name(label: str, metric: str) -> str:
+    safe_label = label.lower().replace(" ", "_").replace("-", "_")
+    return f"{safe_label}_{metric}"
+
+
+def log_mlflow_run(
+    model: Pipeline,
+    table_id: str,
+    df: pd.DataFrame,
+    X_train: pd.DataFrame,
+    X_test: pd.DataFrame,
+    y_train: pd.Series,
+    y_test: pd.Series,
+    predictions: list[str],
+    labels: list[str],
+    majority_class: str,
+    majority_accuracy: float,
+    model_accuracy: float,
+) -> None:
+    classification_report_dict = classification_report(
+        y_test,
+        predictions,
+        labels=labels,
+        zero_division=0,
+        output_dict=True,
+    )
+    confusion_matrix_df = pd.DataFrame(
+        confusion_matrix(y_test, predictions, labels=labels),
+        index=labels,
+        columns=labels,
+    )
+
+    with mlflow.start_run(run_name=MODEL_NAME) as run:
+        mlflow.log_params(
+            {
+                "model_name": MODEL_NAME,
+                "model_type": "LogisticRegression",
+                "feature_table": table_id,
+                "target_column": TARGET_COLUMN,
+                "test_size": TEST_SIZE,
+                "random_state": RANDOM_STATE,
+                "rows_loaded": len(df),
+                "training_rows": len(X_train),
+                "test_rows": len(X_test),
+                "input_feature_count": len(SAFE_FEATURE_COLUMNS),
+                "majority_class": majority_class,
+            }
+        )
+
+        mlflow.log_metrics(
+            {
+                "majority_class_accuracy": majority_accuracy,
+                "model_accuracy": model_accuracy,
+            }
+        )
+
+        for label in labels:
+            label_report = classification_report_dict[label]
+            mlflow.log_metrics(
+                {
+                    metric_name(label, "precision"): label_report["precision"],
+                    metric_name(label, "recall"): label_report["recall"],
+                    metric_name(label, "f1_score"): label_report["f1-score"],
+                    metric_name(label, "support"): label_report["support"],
+                }
+            )
+
+        for label in ["macro avg", "weighted avg"]:
+            label_report = classification_report_dict[label]
+            mlflow.log_metrics(
+                {
+                    metric_name(label, "precision"): label_report["precision"],
+                    metric_name(label, "recall"): label_report["recall"],
+                    metric_name(label, "f1_score"): label_report["f1-score"],
+                }
+            )
+
+        mlflow.log_dict(
+            {
+                "input_features": SAFE_FEATURE_COLUMNS,
+                "excluded_outcome_reference_columns": OUTCOME_REFERENCE_COLUMNS,
+                "target_distribution": value_counts_dict(df[TARGET_COLUMN]),
+                "train_target_distribution": value_counts_dict(y_train),
+                "test_target_distribution": value_counts_dict(y_test),
+            },
+            "run_metadata.json",
+        )
+
+        with TemporaryDirectory() as temp_dir:
+            classification_report_path = os.path.join(temp_dir, "classification_report.json")
+            confusion_matrix_path = os.path.join(temp_dir, "confusion_matrix.csv")
+
+            with open(classification_report_path, "w", encoding="utf-8") as file:
+                json.dump(classification_report_dict, file, indent=2)
+
+            confusion_matrix_df.to_csv(confusion_matrix_path)
+
+            mlflow.log_artifact(classification_report_path, artifact_path="evaluation")
+            mlflow.log_artifact(confusion_matrix_path, artifact_path="evaluation")
+
+        mlflow.sklearn.log_model(
+            model,
+            name="model",
+            serialization_format=mlflow.sklearn.SERIALIZATION_FORMAT_CLOUDPICKLE,
+        )
+
+        print()
+        print("MLflow run logged:")
+        print(f"- run_id: {run.info.run_id}")
+
+
 def train_baseline_model(df: pd.DataFrame, table_id: str) -> None:
     X = df[SAFE_FEATURE_COLUMNS]
     y = df[TARGET_COLUMN]
@@ -96,8 +220,8 @@ def train_baseline_model(df: pd.DataFrame, table_id: str) -> None:
     X_train, X_test, y_train, y_test = train_test_split(
         X,
         y,
-        test_size=0.2,
-        random_state=42,
+        test_size=TEST_SIZE,
+        random_state=RANDOM_STATE,
         stratify=stratify_target,
     )
 
@@ -143,11 +267,31 @@ def train_baseline_model(df: pd.DataFrame, table_id: str) -> None:
     print("Confusion matrix:")
     print(pd.DataFrame(confusion_matrix(y_test, predictions, labels=labels), index=labels, columns=labels))
 
+    log_mlflow_run(
+        model=model,
+        table_id=table_id,
+        df=df,
+        X_train=X_train,
+        X_test=X_test,
+        y_train=y_train,
+        y_test=y_test,
+        predictions=predictions,
+        labels=labels,
+        majority_class=majority_class,
+        majority_accuracy=majority_accuracy,
+        model_accuracy=model_accuracy,
+    )
+
 
 def main() -> None:
     load_dotenv()
 
     feature_table = os.getenv("ML_FEATURE_TABLE", DEFAULT_FEATURE_TABLE)
+    mlflow_tracking_uri = os.getenv("MLFLOW_TRACKING_URI", DEFAULT_MLFLOW_TRACKING_URI)
+    mlflow_experiment = os.getenv("MLFLOW_EXPERIMENT_NAME", DEFAULT_MLFLOW_EXPERIMENT)
+
+    mlflow.set_tracking_uri(mlflow_tracking_uri)
+    mlflow.set_experiment(mlflow_experiment)
 
     df = load_feature_data(feature_table)
     validate_input_data(df)
