@@ -21,7 +21,7 @@ DEFAULT_FEATURE_TABLE = "football-analytics-ml.football_dbt.ml_match_features"
 DEFAULT_MLFLOW_EXPERIMENT = "football-match-result-baseline"
 DEFAULT_MLFLOW_TRACKING_URI = "sqlite:///mlflow.db"
 TARGET_COLUMN = "target_match_result"
-MODEL_NAME = "baseline_logistic_regression"
+MODEL_NAME = "balanced_logistic_regression"
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
 
@@ -136,6 +136,7 @@ def log_mlflow_run(
             {
                 "model_name": MODEL_NAME,
                 "model_type": "LogisticRegression",
+                "class_weight": "balanced",
                 "feature_table": table_id,
                 "target_column": TARGET_COLUMN,
                 "test_size": TEST_SIZE,
@@ -229,7 +230,7 @@ def train_baseline_model(df: pd.DataFrame, table_id: str) -> None:
         steps=[
             ("imputer", SimpleImputer(strategy="median")),
             ("scaler", StandardScaler()),
-            ("classifier", LogisticRegression(max_iter=1000)),
+            ("classifier", LogisticRegression(max_iter=1000, class_weight="balanced")),
         ]
     )
 
@@ -244,7 +245,7 @@ def train_baseline_model(df: pd.DataFrame, table_id: str) -> None:
 
     labels = sorted(y.unique())
 
-    print("Baseline model: Logistic Regression")
+    print("Model: Logistic Regression with balanced class weights")
     print(f"Feature table: {table_id}")
     print(f"Rows loaded: {len(df)}")
     print(f"Training rows: {len(X_train)}")
