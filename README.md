@@ -407,6 +407,12 @@ draw recall
 draw F1 score
 ```
 
+More detailed ML documentation is available in:
+
+```text
+ml/README.md
+```
+
 ---
 
 ## ✅ Data Quality and dbt Tests
@@ -537,6 +543,7 @@ football-analytics-ml-pipeline/
 │           └── season_overview.png
 │
 ├── ml/
+│   ├── README.md
 │   ├── evaluate_stratified_k_fold.py
 │   ├── train_baseline_model.py
 │   ├── train_balanced_logistic_regression.py
