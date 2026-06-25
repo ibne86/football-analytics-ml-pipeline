@@ -7,6 +7,7 @@ from tempfile import TemporaryDirectory
 import mlflow
 import pandas as pd
 from dotenv import load_dotenv
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.impute import SimpleImputer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
@@ -45,27 +46,85 @@ MODEL_CONFIGS = [
     {
         "model_name": "baseline_logistic_regression_stratified_k_fold",
         "display_name": "Baseline Logistic Regression",
+        "model_type": "LogisticRegression",
         "class_weight": None,
     },
     {
         "model_name": "balanced_logistic_regression_stratified_k_fold",
         "display_name": "Balanced Logistic Regression",
+        "model_type": "LogisticRegression",
         "class_weight": "balanced",
+    },
+    {
+        "model_name": "random_forest_classifier_stratified_k_fold",
+        "display_name": "Random Forest Classifier",
+        "model_type": "RandomForestClassifier",
+        "class_weight": "balanced",
+        "n_estimators": 200,
+        "max_depth": 4,
+        "min_samples_leaf": 10,
     },
 ]
 
 
-def build_model(class_weight: str | None) -> Pipeline:
-    return Pipeline(
-        steps=[
-            ("imputer", SimpleImputer(strategy="median")),
-            ("scaler", StandardScaler()),
-            (
-                "classifier",
-                LogisticRegression(max_iter=1000, class_weight=class_weight),
-            ),
-        ]
-    )
+def build_model(model_config: dict[str, object]) -> Pipeline:
+    model_type = model_config["model_type"]
+
+    if model_type == "LogisticRegression":
+        return Pipeline(
+            steps=[
+                ("imputer", SimpleImputer(strategy="median")),
+                ("scaler", StandardScaler()),
+                (
+                    "classifier",
+                    LogisticRegression(
+                        max_iter=1000,
+                        class_weight=model_config["class_weight"],
+                    ),
+                ),
+            ]
+        )
+
+    if model_type == "RandomForestClassifier":
+        return Pipeline(
+            steps=[
+                ("imputer", SimpleImputer(strategy="median")),
+                (
+                    "classifier",
+                    RandomForestClassifier(
+                        n_estimators=int(model_config["n_estimators"]),
+                        max_depth=int(model_config["max_depth"]),
+                        min_samples_leaf=int(model_config["min_samples_leaf"]),
+                        class_weight=model_config["class_weight"],
+                        random_state=RANDOM_STATE,
+                    ),
+                ),
+            ]
+        )
+
+    raise ValueError(f"Unsupported model_type: {model_type}")
+
+
+def model_params_for_logging(model_config: dict[str, object]) -> dict[str, object]:
+    params = {
+        "model_name": model_config["model_name"],
+        "model_type": model_config["model_type"],
+        "class_weight": model_config["class_weight"] or "none",
+    }
+
+    if model_config["model_type"] == "LogisticRegression":
+        params["max_iter"] = 1000
+
+    if model_config["model_type"] == "RandomForestClassifier":
+        params.update(
+            {
+                "n_estimators": model_config["n_estimators"],
+                "max_depth": model_config["max_depth"],
+                "min_samples_leaf": model_config["min_samples_leaf"],
+            }
+        )
+
+    return params
 
 
 def validate_cv_split_count(y: pd.Series) -> None:
@@ -109,12 +168,13 @@ def calculate_metrics(
 
 
 def summarize_fold_metrics(
-    model_config: dict[str, str | None],
+    model_config: dict[str, object],
     fold_metrics_df: pd.DataFrame,
 ) -> dict[str, str | float]:
     summary: dict[str, str | float] = {
         "model_name": str(model_config["model_name"]),
         "display_name": str(model_config["display_name"]),
+        "model_type": str(model_config["model_type"]),
         "class_weight": str(model_config["class_weight"] or "none"),
     }
 
@@ -126,7 +186,7 @@ def summarize_fold_metrics(
 
 
 def log_cv_run(
-    model_config: dict[str, str | None],
+    model_config: dict[str, object],
     table_id: str,
     df: pd.DataFrame,
     labels: list[str],
@@ -138,9 +198,7 @@ def log_cv_run(
     with mlflow.start_run(run_name=str(model_config["model_name"])) as run:
         mlflow.log_params(
             {
-                "model_name": model_config["model_name"],
-                "model_type": "LogisticRegression",
-                "class_weight": model_config["class_weight"] or "none",
+                **model_params_for_logging(model_config),
                 "feature_table": table_id,
                 "target_column": TARGET_COLUMN,
                 "cv_strategy": "StratifiedKFold",
@@ -198,7 +256,7 @@ def log_cv_run(
 
 
 def evaluate_model_with_stratified_k_fold(
-    model_config: dict[str, str | None],
+    model_config: dict[str, object],
     table_id: str,
     df: pd.DataFrame,
     cv: StratifiedKFold,
@@ -216,7 +274,7 @@ def evaluate_model_with_stratified_k_fold(
         y_train = y.iloc[train_index]
         y_test = y.iloc[test_index]
 
-        model = build_model(model_config["class_weight"])
+        model = build_model(model_config)
         model.fit(X_train, y_train)
 
         predictions = model.predict(X_test)
