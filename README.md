@@ -305,6 +305,7 @@ ml/train_baseline_model.py
 ml/train_balanced_logistic_regression.py
 ml/train_random_forest_model.py
 ml/evaluate_stratified_k_fold.py
+ml/tune_random_forest_grid_search.py
 ```
 
 `train_baseline_model.py` trains the original Logistic Regression baseline without class weighting.
@@ -320,6 +321,8 @@ The balanced model was added because the original baseline did not predict draws
 `train_random_forest_model.py` trains a Random Forest classifier as the first non-linear comparison model.
 
 `evaluate_stratified_k_fold.py` compares the models using Stratified K-Fold cross-validation.
+
+`tune_random_forest_grid_search.py` tunes the Random Forest model using GridSearchCV.
 
 The models predict:
 
@@ -365,6 +368,31 @@ Draw precision:  0.313
 Draw recall:     0.363
 Draw F1 score:   0.333
 ```
+
+Random Forest was also tuned with GridSearchCV using macro F1 as the main optimization metric.
+
+Best GridSearchCV parameters:
+
+```text
+class_weight:     balanced
+max_depth:        4
+max_features:     sqrt
+min_samples_leaf: 5
+n_estimators:     200
+```
+
+Tuned Random Forest result:
+
+```text
+Accuracy:        0.497
+Macro F1:        0.476
+Weighted F1:     0.501
+Draw precision:  0.303
+Draw recall:     0.399
+Draw F1 score:   0.342
+```
+
+GridSearchCV produced only marginal gains. It improved draw recall and draw F1 slightly, but it did not materially improve the overall model. This suggests the current limitation is likely the small dataset and available features, not only Random Forest hyperparameters.
 
 MLflow is used to track model runs, metrics, parameters, artifacts, and trained model outputs locally.
 
@@ -512,7 +540,8 @@ football-analytics-ml-pipeline/
 │   ├── evaluate_stratified_k_fold.py
 │   ├── train_baseline_model.py
 │   ├── train_balanced_logistic_regression.py
-│   └── train_random_forest_model.py
+│   ├── train_random_forest_model.py
+│   └── tune_random_forest_grid_search.py
 │
 ├── README.md
 └── requirements.txt
@@ -559,6 +588,7 @@ This project demonstrates practical data and engineering skills:
 * MLflow experiment tracking
 * Stratified K-Fold model evaluation
 * Random Forest model comparison
+* Random Forest hyperparameter tuning with GridSearchCV
 * GitHub documentation
 * branch-based development workflow
 
@@ -593,6 +623,7 @@ Completed:
 * MLflow tracking added for local model experiment tracking
 * Stratified K-Fold cross-validation evaluation added
 * Random Forest comparison model added
+* Random Forest GridSearchCV tuning added
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
@@ -679,6 +710,7 @@ Current focus:
 * [x] Track model results with MLflow
 * [x] Compare model results with cross-validation
 * [x] Add Random Forest comparison model
+* [x] Tune Random Forest with GridSearchCV
 * [x] Document initial ML findings
 
 ---
@@ -761,6 +793,12 @@ Run Stratified K-Fold model comparison:
 python ml/evaluate_stratified_k_fold.py
 ```
 
+Tune the Random Forest model with GridSearchCV:
+
+```bash
+python ml/tune_random_forest_grid_search.py
+```
+
 Start the local MLflow UI:
 
 ```bash
@@ -809,7 +847,7 @@ API data collection
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, a Random Forest comparison model, Stratified K-Fold evaluation, and local MLflow experiment tracking. The Random Forest model currently gives the best balanced class performance, but the overall model is still weak. The next improvement should come from careful feature engineering or another clearly justified model comparison.
+The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, a Random Forest comparison model, Stratified K-Fold evaluation, Random Forest GridSearchCV tuning, and local MLflow experiment tracking. Random Forest currently gives the best balanced class performance, but GridSearchCV only produced marginal gains and the overall model is still weak. The next improvement should come from careful feature engineering or more data, not from treating the tuned model as a final strong predictor.
 
 ---
 
