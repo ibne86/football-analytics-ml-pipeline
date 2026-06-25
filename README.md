@@ -294,15 +294,17 @@ Future ML features may include:
 
 Goal and result columns should be used as labels or evaluation fields, not as predictive input features.
 
-The first Python ML step uses these safe input features to train and evaluate simple Logistic Regression models.
+The first Python ML step uses these safe input features to train and evaluate simple classification models.
 
-### ML Model Training Scripts
+### ML Model Training and Evaluation Scripts
 
-The project includes two Python ML training scripts:
+The project includes Python ML training and evaluation scripts:
 
 ```text
 ml/train_baseline_model.py
 ml/train_balanced_logistic_regression.py
+ml/train_random_forest_model.py
+ml/evaluate_stratified_k_fold.py
 ```
 
 `train_baseline_model.py` trains the original Logistic Regression baseline without class weighting.
@@ -315,13 +317,17 @@ class_weight = balanced
 
 The balanced model was added because the original baseline did not predict draws well.
 
-Both models predict:
+`train_random_forest_model.py` trains a Random Forest classifier as the first non-linear comparison model.
+
+`evaluate_stratified_k_fold.py` compares the models using Stratified K-Fold cross-validation.
+
+The models predict:
 
 ```text
 target_match_result
 ```
 
-Both models use only leakage-safe pre-match input features from `ml_match_features`.
+The models use only leakage-safe pre-match input features from `ml_match_features`.
 
 Outcome and reference columns are intentionally excluded from model inputs:
 
@@ -346,6 +352,19 @@ Logistic Regression accuracy: 0.513
 The original Logistic Regression baseline performs better than always predicting the most common result, but it does not predict draws well.
 
 The balanced Logistic Regression model improves draw handling, while also changing the trade-off between overall accuracy and class-level performance.
+
+The Random Forest model is the best model so far for balanced class performance, especially draw prediction, but the overall model is still weak and should not be treated as a final strong predictor.
+
+Current Stratified K-Fold Random Forest result:
+
+```text
+Accuracy:        0.497
+Macro F1:        0.473
+Weighted F1:     0.499
+Draw precision:  0.313
+Draw recall:     0.363
+Draw F1 score:   0.333
+```
 
 MLflow is used to track model runs, metrics, parameters, artifacts, and trained model outputs locally.
 
@@ -490,8 +509,10 @@ football-analytics-ml-pipeline/
 │           └── season_overview.png
 │
 ├── ml/
+│   ├── evaluate_stratified_k_fold.py
 │   ├── train_baseline_model.py
-│   └── train_balanced_logistic_regression.py
+│   ├── train_balanced_logistic_regression.py
+│   └── train_random_forest_model.py
 │
 ├── README.md
 └── requirements.txt
@@ -535,6 +556,9 @@ This project demonstrates practical data and engineering skills:
 * Power BI dashboard creation
 * machine learning feature preparation
 * baseline machine learning model training
+* MLflow experiment tracking
+* Stratified K-Fold model evaluation
+* Random Forest model comparison
 * GitHub documentation
 * branch-based development workflow
 
@@ -567,14 +591,16 @@ Completed:
 * baseline model evaluated against a majority-class guess
 * balanced Logistic Regression model added to improve draw prediction handling
 * MLflow tracking added for local model experiment tracking
+* Stratified K-Fold cross-validation evaluation added
+* Random Forest comparison model added
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 
 Current focus:
 
-* compare baseline and balanced Logistic Regression runs in MLflow
-* add cross-validation for more reliable model evaluation
+* interpret model results honestly and avoid overclaiming model strength
+* improve the model with careful feature engineering or additional model comparison
 * add automation with GitHub Actions later
 * improve dashboard pages over time
 
@@ -651,8 +677,9 @@ Current focus:
 * [x] Evaluate baseline model performance
 * [x] Improve draw prediction handling with balanced Logistic Regression
 * [x] Track model results with MLflow
-* [ ] Compare model results with cross-validation
-* [ ] Document ML findings
+* [x] Compare model results with cross-validation
+* [x] Add Random Forest comparison model
+* [x] Document initial ML findings
 
 ---
 
@@ -722,6 +749,18 @@ Run the balanced Logistic Regression model:
 python ml/train_balanced_logistic_regression.py
 ```
 
+Run the Random Forest model:
+
+```bash
+python ml/train_random_forest_model.py
+```
+
+Run Stratified K-Fold model comparison:
+
+```bash
+python ml/evaluate_stratified_k_fold.py
+```
+
 Start the local MLflow UI:
 
 ```bash
@@ -770,7 +809,7 @@ API data collection
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, and local MLflow experiment tracking. The next step is to compare model performance more reliably with cross-validation before adding another model type.
+The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, a Random Forest comparison model, Stratified K-Fold evaluation, and local MLflow experiment tracking. The Random Forest model currently gives the best balanced class performance, but the overall model is still weak. The next improvement should come from careful feature engineering or another clearly justified model comparison.
 
 ---
 
