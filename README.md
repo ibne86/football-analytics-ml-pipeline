@@ -54,7 +54,7 @@ It focuses on:
 * creating a Power BI dashboard
 * creating ML-ready features and evaluating baseline models
 * tracking ML experiments locally with MLflow
-* running basic CI checks with GitHub Actions
+* running CI checks and full pipeline automation with GitHub Actions
 * documenting the project clearly on GitHub
 
 This is not only a dashboard project.
@@ -483,12 +483,13 @@ This helps explain what each dbt model does, how the models relate to each other
 
 ---
 
-## ✅ CI and Repository Cleanup
+## ✅ CI, Automation, and Repository Cleanup
 
-The project includes a basic GitHub Actions workflow:
+The project includes two GitHub Actions workflows:
 
 ```text
 .github/workflows/ci.yml
+.github/workflows/full_pipeline.yml
 ```
 
 The CI workflow runs on pull requests and pushes to `main`.
@@ -500,6 +501,20 @@ It checks that:
 * the dbt project can be parsed successfully
 
 This is a lightweight safety check. It does not run the full data pipeline, load BigQuery data, run dbt models, or train ML models.
+
+The full pipeline workflow can be run manually from GitHub Actions and is also scheduled to run daily.
+
+It runs:
+
+```text
+fetch API data
+-> prepare JSONL
+-> load raw fixtures to BigQuery
+-> run dbt models
+-> run dbt tests
+```
+
+The full pipeline workflow requires GitHub repository secrets for the football API key and Google Cloud authentication.
 
 Generated local artifacts are ignored by Git so the repository stays clean.
 
@@ -542,11 +557,13 @@ These files can be recreated locally and should not usually be committed.
 football-analytics-ml-pipeline/
 ├── .github/
 │   └── workflows/
-│       └── ci.yml
+│       ├── ci.yml
+│       └── full_pipeline.yml
 │
 ├── ingestion/
 │   ├── fetch_data.py
-│   └── prepare_bigquery_jsonl.py
+│   ├── prepare_bigquery_jsonl.py
+│   └── load_bigquery.py
 │
 ├── data/
 │   └── raw/
@@ -640,6 +657,7 @@ This project demonstrates practical data and engineering skills:
 * Random Forest model comparison
 * Random Forest hyperparameter tuning with GridSearchCV
 * basic GitHub Actions CI checks
+* scheduled GitHub Actions pipeline automation
 * repository cleanup with generated files ignored by Git
 * GitHub documentation
 * branch-based development workflow
@@ -680,6 +698,8 @@ Completed:
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
 * basic GitHub Actions CI workflow added
+* full pipeline GitHub Actions workflow added
+* BigQuery raw data load script added
 * generated local artifacts ignored with `.gitignore`
 
 Current focus:
@@ -687,7 +707,7 @@ Current focus:
 * interpret model results honestly and avoid overclaiming model strength
 * keep the repository clean and easy to review
 * document the project clearly as a portfolio project
-* treat full scheduled automation as future work
+* monitor scheduled pipeline runs in GitHub Actions
 
 ---
 
@@ -774,9 +794,11 @@ Current focus:
 * [x] Add basic GitHub Actions workflow
 * [x] Check Python syntax in CI
 * [x] Check dbt project parsing in CI
-* [ ] Automate data ingestion
-* [ ] Automate validation steps
-* [ ] Automate dbt transformations
+* [x] Add full pipeline GitHub Actions workflow
+* [x] Automate data ingestion
+* [x] Automate raw data loading to BigQuery
+* [x] Automate dbt transformations
+* [x] Automate dbt validation tests
 
 ---
 
@@ -807,6 +829,12 @@ Prepare the JSONL file for BigQuery:
 
 ```bash
 python ingestion/prepare_bigquery_jsonl.py
+```
+
+Load the raw fixture data to BigQuery:
+
+```bash
+python ingestion/load_bigquery.py
 ```
 
 Run dbt models:
@@ -876,7 +904,7 @@ python -m mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 API keys should not be written directly in the code.
 
-The project uses an environment variable:
+The local ingestion script uses this environment variable:
 
 ```text
 FOOTBALL_API_KEY
@@ -891,6 +919,33 @@ FOOTBALL_API_KEY=your_api_key_here
 ```
 
 The `.env` file is ignored by Git and should not be pushed to GitHub.
+
+The BigQuery load script also supports these optional environment variables:
+
+```text
+GCP_PROJECT_ID
+BIGQUERY_RAW_DATASET
+BIGQUERY_RAW_TABLE
+BIGQUERY_FIXTURES_JSONL
+```
+
+If these are not set, the script uses the project defaults:
+
+```text
+GCP_PROJECT_ID=football-analytics-ml
+BIGQUERY_RAW_DATASET=football_raw
+BIGQUERY_RAW_TABLE=raw_fixtures
+BIGQUERY_FIXTURES_JSONL=data/raw/fixtures_premier_league_2023_rows.jsonl
+```
+
+The full GitHub Actions pipeline requires these repository secrets:
+
+```text
+FOOTBALL_API_KEY
+GCP_SERVICE_ACCOUNT_KEY
+```
+
+`GCP_SERVICE_ACCOUNT_KEY` should contain a Google Cloud service account JSON key with permission to create/load the raw BigQuery table and run dbt models in BigQuery.
 
 ---
 
@@ -911,13 +966,14 @@ API data collection
 → ML-ready feature table
 → model comparison and MLflow tracking
 → basic CI checks
+→ scheduled full pipeline automation
 ```
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
 The machine learning layer has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, a Random Forest comparison model, Stratified K-Fold evaluation, Random Forest GridSearchCV tuning, and local MLflow experiment tracking. Random Forest currently gives the best balanced class performance, but GridSearchCV only produced marginal gains and the overall model is still weak.
 
-The ML results should be presented honestly as an experiment and evaluation workflow, not as a strong final prediction system. If the project is extended later, the most useful next improvements would likely come from more seasons of data, better pre-match features, and scheduled pipeline automation.
+The ML results should be presented honestly as an experiment and evaluation workflow, not as a strong final prediction system. If the project is extended later, the most useful next improvements would likely come from more seasons of data and better pre-match features.
 
 Generated files such as raw API extracts, dbt build artifacts, MLflow runs, local reports, virtual environments, and local editor files are ignored by Git so the repository stays clean.
 
