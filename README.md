@@ -52,7 +52,9 @@ It focuses on:
 * validating data quality with dbt tests
 * building dashboard-ready datasets
 * creating a Power BI dashboard
-* preparing future machine learning features
+* creating ML-ready features and evaluating baseline models
+* tracking ML experiments locally with MLflow
+* running basic CI checks with GitHub Actions
 * documenting the project clearly on GitHub
 
 This is not only a dashboard project.
@@ -77,7 +79,7 @@ BigQuery Clean Analytics Tables
     ↓
 Power BI Dashboard
     ↓
-Future Machine Learning Prediction
+Machine Learning Model Evaluation
 ```
 
 ---
@@ -481,6 +483,43 @@ This helps explain what each dbt model does, how the models relate to each other
 
 ---
 
+## ✅ CI and Repository Cleanup
+
+The project includes a basic GitHub Actions workflow:
+
+```text
+.github/workflows/ci.yml
+```
+
+The CI workflow runs on pull requests and pushes to `main`.
+
+It checks that:
+
+* Python dependencies can be installed
+* Python files in `ingestion/` and `ml/` have valid syntax
+* the dbt project can be parsed successfully
+
+This is a lightweight safety check. It does not run the full data pipeline, load BigQuery data, run dbt models, or train ML models.
+
+Generated local artifacts are ignored by Git so the repository stays clean.
+
+Ignored local outputs include:
+
+```text
+data/raw/*.json
+data/raw/*.jsonl
+dbt_project/logs/
+dbt_project/target/
+mlruns/
+mlartifacts/
+mlflow.db
+reports/
+```
+
+These files can be recreated locally and should not usually be committed.
+
+---
+
 ## 🛠️ Tech Stack
 
 | Area                 | Tools              |
@@ -501,6 +540,10 @@ This helps explain what each dbt model does, how the models relate to each other
 
 ```text
 football-analytics-ml-pipeline/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+│
 ├── ingestion/
 │   ├── fetch_data.py
 │   └── prepare_bigquery_jsonl.py
@@ -596,6 +639,8 @@ This project demonstrates practical data and engineering skills:
 * Stratified K-Fold model evaluation
 * Random Forest model comparison
 * Random Forest hyperparameter tuning with GridSearchCV
+* basic GitHub Actions CI checks
+* repository cleanup with generated files ignored by Git
 * GitHub documentation
 * branch-based development workflow
 
@@ -634,13 +679,15 @@ Completed:
 * Power BI dashboard created for Premier League 2023/24 season overview
 * Power BI KPI cards updated to use the `season_summary` dbt mart table
 * dashboard screenshot added to the repository and README
+* basic GitHub Actions CI workflow added
+* generated local artifacts ignored with `.gitignore`
 
 Current focus:
 
 * interpret model results honestly and avoid overclaiming model strength
-* improve the model with careful feature engineering or additional model comparison
-* add automation with GitHub Actions later
-* improve dashboard pages over time
+* keep the repository clean and easy to review
+* document the project clearly as a portfolio project
+* treat full scheduled automation as future work
 
 ---
 
@@ -724,7 +771,9 @@ Current focus:
 
 ### Phase 7: Automation
 
-* [ ] Add GitHub Actions workflow
+* [x] Add basic GitHub Actions workflow
+* [x] Check Python syntax in CI
+* [x] Check dbt project parsing in CI
 * [ ] Automate data ingestion
 * [ ] Automate validation steps
 * [ ] Automate dbt transformations
@@ -737,6 +786,15 @@ Install dependencies:
 
 ```bash
 pip install -r requirements.txt
+```
+
+Run lightweight local checks:
+
+```bash
+python -m compileall -q ingestion ml
+cd dbt_project
+dbt parse
+cd ..
 ```
 
 Run the data ingestion script:
@@ -838,7 +896,7 @@ The `.env` file is ignored by Git and should not be pushed to GitHub.
 
 ## 📌 Notes
 
-This project is being built step by step.
+This project is portfolio-ready as an end-to-end analytics and introductory ML pipeline.
 
 The current version focuses on:
 
@@ -850,11 +908,18 @@ API data collection
 → data quality testing
 → dashboard-ready tables
 → Power BI dashboard
+→ ML-ready feature table
+→ model comparison and MLflow tracking
+→ basic CI checks
 ```
 
 The dashboard KPI logic is prepared in dbt using the `season_summary` mart table, while Power BI is used mainly for visualization.
 
-The machine learning layer now has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, a Random Forest comparison model, Stratified K-Fold evaluation, Random Forest GridSearchCV tuning, and local MLflow experiment tracking. Random Forest currently gives the best balanced class performance, but GridSearchCV only produced marginal gains and the overall model is still weak. The next improvement should come from careful feature engineering or more data, not from treating the tuned model as a final strong predictor.
+The machine learning layer has a documented feature mart, a prediction target, season-to-date features, recent-form features, an original Logistic Regression baseline model, a balanced Logistic Regression model, a Random Forest comparison model, Stratified K-Fold evaluation, Random Forest GridSearchCV tuning, and local MLflow experiment tracking. Random Forest currently gives the best balanced class performance, but GridSearchCV only produced marginal gains and the overall model is still weak.
+
+The ML results should be presented honestly as an experiment and evaluation workflow, not as a strong final prediction system. If the project is extended later, the most useful next improvements would likely come from more seasons of data, better pre-match features, and scheduled pipeline automation.
+
+Generated files such as raw API extracts, dbt build artifacts, MLflow runs, local reports, virtual environments, and local editor files are ignored by Git so the repository stays clean.
 
 ---
 
