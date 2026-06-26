@@ -29,6 +29,11 @@ jobs:
       - name: Check Python syntax
         run: python -m compileall ingestion ml
 
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SERVICE_ACCOUNT_KEY }}
+
       - name: Create dbt CI profile
         run: |
           mkdir -p "$RUNNER_TEMP/dbt_profiles"
