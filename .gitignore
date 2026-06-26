@@ -1,21 +1,39 @@
+# Environment variables and local secrets
 .env
+
+# Python environments and caches
 __pycache__/
 *.pyc
-
 .venv/
 .venv*/
 venv/
 env/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
 
+# Local raw data extracts
 data/raw/*.json
 data/raw/*.jsonl
 
+# dbt generated files and local packages
 dbt_project/logs/
 dbt_project/target/
 dbt_project/dbt_packages/
+dbt_project/.user.yml
 
+# Local ML experiment outputs
 mlruns/
 reports/
 mlflow.db
 mlflow.db-*
 mlartifacts/
+
+# Editor, OS, and notebook artifacts
+.DS_Store
+Thumbs.db
+.ipynb_checkpoints/
+.vscode/
+.idea/
