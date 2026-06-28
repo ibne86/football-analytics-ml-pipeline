@@ -145,9 +145,9 @@ mlartifacts/
 
 ## Conclusion
 
-Random Forest is currently the strongest model in this project, especially for draw prediction.
+The ML layer demonstrates feature creation, model comparison, evaluation, and experiment tracking. The current results provide a baseline benchmark that can be improved with more seasons of data and richer pre-match features.
 
-However, the model is still weak overall. GridSearchCV tuning only produced marginal gains, and several attempted feature/model experiments did not improve the results enough to keep.
+GridSearchCV tuning only produced marginal gains, and several attempted feature/model experiments did not improve the results enough to keep.
 
 The main limitation is likely the small dataset and limited available pre-match information.
 

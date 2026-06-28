@@ -174,7 +174,7 @@ Random Forest
 Tuned Random Forest
 ```
 
-The current best model by balanced class performance is Random Forest, but the overall model is still weak. The ML work should be presented as an honest experiment and evaluation workflow, not as a strong final prediction system.
+The ML layer compares baseline models for match-result prediction.
 
 Detailed ML results and scripts are documented in [ml/README.md](ml/README.md).
 
@@ -184,23 +184,13 @@ Detailed ML results and scripts are documented in [ml/README.md](ml/README.md).
 
 The project is portfolio-ready as an end-to-end football analytics pipeline.
 
-Completed:
+The data engineering workflow is automated with GitHub Actions:
 
-* API-Football ingestion
-* local raw JSON and JSONL preparation
-* BigQuery raw data loading
-* dbt staging, intermediate, and mart models
-* dbt schema tests and custom business-rule tests
-* dbt model and column documentation
-* Power BI dashboard
-* ML-ready feature table
-* baseline and comparison ML models
-* MLflow experiment tracking
-* Stratified K-Fold model evaluation
-* Random Forest GridSearchCV tuning
-* basic CI workflow
-* full pipeline automation workflow
-* repository cleanup and documentation
+```text
+API fetch → BigQuery load → dbt run → dbt test
+```
+
+The project also includes a Power BI dashboard and an ML layer for match-result prediction. The current ML results provide a baseline benchmark that can be improved with more seasons of data and richer pre-match features.
 
 ---
 
