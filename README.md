@@ -7,6 +7,7 @@
 <br>
 
 ![Python](https://img.shields.io/badge/PYTHON-3776AB?style=for-the-badge\&logo=python\&logoColor=white)
+![SQL](https://img.shields.io/badge/SQL-F29111?style=for-the-badge\&logo=postgresql\&logoColor=white)
 ![BigQuery](https://img.shields.io/badge/BIGQUERY-4285F4?style=for-the-badge\&logo=googlecloud\&logoColor=white)
 ![dbt](https://img.shields.io/badge/DBT-FF694B?style=for-the-badge\&logo=dbt\&logoColor=white)
 ![Power BI](https://img.shields.io/badge/POWER%20BI-F2C811?style=for-the-badge\&logo=powerbi\&logoColor=black)
@@ -327,9 +328,9 @@ FOOTBALL_API_KEY
 GCP_SERVICE_ACCOUNT_KEY
 ```
 
-`GCP_SERVICE_ACCOUNT_KEY` should contain a Google Cloud service account JSON key with BigQuery permissions.
+GitHub Actions uses repository secrets for the API key and Google Cloud authentication.
 
-Do not commit `.env`, API keys, or service account JSON files.
+For setup details, see [docs/automation.md](docs/automation.md).
 
 ---
 
